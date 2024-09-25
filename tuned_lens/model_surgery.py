@@ -125,7 +125,7 @@ def get_final_norm(model: Model) -> Norm:
     #     final_layer_norm = base_model.norm
     elif isinstance(base_model, LoraModel):
     # Access the base model wrapped by the LoraModel
-        final_layer_norm = base_model.model.norm if hasattr(base_model.model, 'norm') else base_model.model.ln_f
+        final_layer_norm = base_model.model.model.norm if hasattr(base_model.model.model, 'norm') else base_model.model.model.ln_f
     # elif isinstance(base_model, PeftModelForCausalLM):
     # # Access the base model wrapped by the PeftModelForCausalLM
     #     final_layer_norm = base_model.base_model.model.norm if hasattr(base_model.base_model.model, 'norm') else base_model.base_model.model.ln_f
