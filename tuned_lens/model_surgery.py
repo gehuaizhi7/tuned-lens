@@ -73,14 +73,43 @@ Norm = Union[
 ]
 
 
+# def get_unembedding_matrix(model: Model) -> nn.Linear:
+#     """The final linear tranformation from the model hidden state to the output."""
+#     if isinstance(model, tr.PreTrainedModel):
+#         unembed = model.get_output_embeddings()
+#         if not isinstance(unembed, nn.Linear):
+#             raise ValueError("We currently only support linear unemebdings")
+#         return unembed
+#     elif _transformer_lens_available and isinstance(model, tl.HookedTransformer):
+#         linear = nn.Linear(
+#             in_features=model.cfg.d_model,
+#             out_features=model.cfg.d_vocab_out,
+#         )
+#         linear.bias.data = model.unembed.b_U
+#         linear.weight.data = model.unembed.W_U.transpose(0, 1)
+#         return linear
+#     else:
+#         raise ValueError(f"Model class {type(model)} not recognized!")
+
 def get_unembedding_matrix(model: Model) -> nn.Linear:
-    """The final linear tranformation from the model hidden state to the output."""
-    if isinstance(model, tr.PreTrainedModel):
-        unembed = model.get_output_embeddings()
-        if not isinstance(unembed, nn.Linear):
-            raise ValueError("We currently only support linear unemebdings")
-        return unembed
-    elif _transformer_lens_available and isinstance(model, tl.HookedTransformer):
+    """The final linear transformation from the model hidden state to the output."""
+    unembed = None
+    current_model = model
+    while current_model is not None:
+        if hasattr(current_model, 'get_output_embeddings'):
+            unembed = current_model.get_output_embeddings()
+            if unembed is not None:
+                if not isinstance(unembed, nn.Linear):
+                    raise ValueError("We currently only support linear unembeddings")
+                return unembed
+        # Check for base model attributes commonly used in wrapper models
+        if hasattr(current_model, 'base_model'):
+            current_model = current_model.base_model
+        elif hasattr(current_model, 'model'):
+            current_model = current_model.model
+        else:
+            current_model = None
+    if _transformer_lens_available and isinstance(model, tl.HookedTransformer):
         linear = nn.Linear(
             in_features=model.cfg.d_model,
             out_features=model.cfg.d_vocab_out,
@@ -90,6 +119,7 @@ def get_unembedding_matrix(model: Model) -> nn.Linear:
         return linear
     else:
         raise ValueError(f"Model class {type(model)} not recognized!")
+
 
 
 def get_final_norm(model: Model) -> Norm:
