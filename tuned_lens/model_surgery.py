@@ -2,7 +2,7 @@
 
 from contextlib import contextmanager
 from typing import Any, Generator, TypeVar, Union
-from peft.tuners.lora import LoraModel
+from peft.peft_model import PeftModelForCausalLM
 
 
 try:
