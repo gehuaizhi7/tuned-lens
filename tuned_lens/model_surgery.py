@@ -68,7 +68,7 @@ Model = Union[tr.PreTrainedModel, "tl.HookedTransformer"]
 Norm = Union[
     th.nn.LayerNorm,
     models.llama.modeling_llama.LlamaRMSNorm,
-    models.gemma.modeling_gemma.GemmaRMSNorm,
+    # models.gemma.modeling_gemma.GemmaRMSNorm,
     nn.Module,
 ]
 
